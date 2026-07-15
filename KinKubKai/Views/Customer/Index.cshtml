@@ -1,0 +1,53 @@
+﻿@model IEnumerable<KinKubKai.Models.MenuItem>
+@{
+    ViewData["Title"] = "เมนูอาหาร";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    var categories = Model.Select(m => m.Category).Distinct().ToList();
+}
+
+<div class="container mt-4 mb-5 pb-5">
+    <!-- ร้านค้า Header -->
+    <div class="text-center mb-4">
+        <h4 class="fw-bold">KinKubKai</h4>
+        <span class="badge bg-light text-secondary border">เปิดอยู่ 08:00 - 20:00</span>
+    </div>
+
+    <!-- แถบหมวดหมู่แบบเลื่อนได้ -->
+    <div class="d-flex overflow-auto mb-4" style="gap: 10px; scrollbar-width: none;">
+        @foreach (var cat in categories)
+        {
+            <button class="category-btn @(cat == categories.First() ? "active" : "")">@cat</button>
+        }
+    </div>
+
+    <!-- รายการอาหารแยกตามหมวดหมู่ -->
+    @foreach (var cat in categories)
+    {
+        <h5 class="fw-bold mb-3 mt-4">@cat</h5>
+        <div class="row g-3">
+            @foreach (var item in Model.Where(m => m.Category == cat))
+            {
+                <div class="col-6">
+                    <div class="card food-card h-100 shadow-sm border-0">
+                        <img src="@item.ImageUrl" class="card-img-top food-img" alt="@item.Name">
+                        <div class="card-body p-2">
+                            <h6 class="card-title fw-bold mb-0">@item.Name</h6>
+                            <small class="text-muted">ความอร่อยระดับพรีเมียม</small>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <span class="text-danger fw-bold">@item.Price.ToString("N0")฿</span>
+                                <button class="btn btn-danger btn-sm rounded-circle shadow-sm">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Sticky Cart Button -->
+<div class="fixed-bottom p-3 bg-white border-top">
+    <button class="btn btn-cart w-100 py-3 fw-bold shadow">
+        ดูตะกร้าสินค้า (0)
+    </button>
+</div>

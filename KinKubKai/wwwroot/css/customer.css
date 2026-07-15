@@ -1,0 +1,195 @@
+﻿body {
+    :root {
+        --primary-red: #b91c1c;
+        --white: #ffffff;
+        --light-gray: #f1f5f9;
+    }
+
+    body {
+        background-color: var(--light-gray);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .navbar {
+        background-color: var(--primary-red) !important;
+    }
+
+    .navbar-brand, .nav-link {
+        color: var(--white) !important;
+        font-weight: 600;
+    }
+
+    #sidebar {
+        background-color: var(--primary-red) !important;
+        color: white;
+        min-height: 90vh;
+    }
+
+        #sidebar .nav-link {
+            color: rgba(255,255,255,0.8) !important;
+        }
+
+            #sidebar .nav-link:hover {
+                color: var(--white) !important;
+                background-color: rgba(255,255,255,0.1);
+            }
+
+    .main-content-card {
+        background-color: var(--white);
+        padding: 1.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border-radius: 0.5rem;
+    }
+    /* ปรับแต่งปุ่มหมวดหมู่ให้ดูนุ่มนวล */
+    .category-btn {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 8px 20px;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+        .category-btn.active {
+            background: #b91c1c;
+            color: #fff;
+            border-color: #b91c1c;
+        }
+    /* ปรับ Card อาหารให้ดู Clean และมีมิติ */
+    .food-card {
+        transition: transform 0.2s;
+        border-radius: 16px !important;
+    }
+
+        .food-card:active {
+            transform: scale(0.97);
+        }
+
+    .food-img {
+        border-radius: 12px 12px 0 0;
+        height: 120px;
+        object-fit: cover;
+    }
+    /* ปุ่มตะกร้าที่ดูเด่นสะดุดตา */
+    .btn-cart {
+        background: #b91c1c;
+        color: white;
+        border-radius: 12px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
+    }
+    /* ปรับแต่งปุ่มหมวดหมู่ให้ดูนุ่มนวล */
+    .category-btn {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 8px 20px;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+        .category-btn.active {
+            background: #b91c1c;
+            color: #fff;
+            border-color: #b91c1c;
+        }
+    /* ปรับ Card อาหารให้ดู Clean และมีมิติ */
+    .food-card {
+        transition: transform 0.2s;
+        border-radius: 16px !important;
+    }
+
+        .food-card:active {
+            transform: scale(0.97);
+        }
+
+    .food-img {
+        border-radius: 12px 12px 0 0;
+        height: 120px;
+        object-fit: cover;
+    }
+    /* ปุ่มตะกร้าที่ดูเด่นสะดุดตา */
+    .btn-cart {
+        background: #b91c1c;
+        color: white;
+        border-radius: 12px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
+    }
+    /* ปรับแต่งปุ่มหมวดหมู่ให้ดูนุ่มนวล */
+    .category-btn {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 8px 20px;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+        .category-btn.active {
+            background: #b91c1c;
+            color: #fff;
+            border-color: #b91c1c;
+        }
+    /* ปรับ Card อาหารให้ดู Clean และมีมิติ */
+    .food-card {
+        transition: transform 0.2s;
+        border-radius: 16px !important;
+    }
+
+        .food-card:active {
+            transform: scale(0.97);
+        }
+
+    .food-img {
+        border-radius: 12px 12px 0 0;
+        height: 120px;
+        object-fit: cover;
+    }
+    /* ปุ่มตะกร้าที่ดูเด่นสะดุดตา */
+    .btn-cart {
+        background: #b91c1c;
+        color: white;
+        border-radius: 12px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
+    }
+    /* ปรับแต่งปุ่มหมวดหมู่ */
+    .category-btn {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 8px 20px;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        font-size: 0.9rem;
+    }
+
+        .category-btn.active {
+            background: #b91c1c;
+            color: #fff;
+            border-color: #b91c1c;
+        }
+    /* ปรับแต่ง Card อาหาร */
+    .food-card {
+        transition: transform 0.2s;
+        border-radius: 16px !important;
+    }
+
+        .food-card:active {
+            transform: scale(0.97);
+        }
+
+    .food-img {
+        border-radius: 12px 12px 0 0;
+        height: 120px;
+        object-fit: cover;
+    }
+    /* ปุ่มตะกร้า */
+    .btn-cart {
+        background: #b91c1c;
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
+    }
+}

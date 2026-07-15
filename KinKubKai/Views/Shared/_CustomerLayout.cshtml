@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - KinKubKai</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/customer.css" />
+
+    <style>
+            body {
+                background-color: #f8fafc;
+                font-family: 'Inter', sans-serif;
+            }
+    </style>
+</head>
+<body>
+    <!-- ไม่มี Sidebar และไม่มี Sidebar-nav -->
+    <main role="main">
+        @RenderBody()
+    </main>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

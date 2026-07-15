@@ -1,0 +1,10 @@
+:root {
+    --primary-red: #b91c1c;
+    --white: #ffffff;
+    --light-gray: #f1f5f9;
+}
+
+body {
+    background-color: var(--light-gray);
+    font-family: 'Promt', sans-serif;
+}
