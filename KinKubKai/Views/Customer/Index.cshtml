@@ -3,51 +3,838 @@
     ViewData["Title"] = "เมนูอาหาร";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
     var categories = Model.Select(m => m.Category).Distinct().ToList();
+    var firstCat = categories.FirstOrDefault();
 }
 
-<div class="container mt-4 mb-5 pb-5">
-    <!-- ร้านค้า Header -->
-    <div class="text-center mb-4">
-        <h4 class="fw-bold">KinKubKai</h4>
-        <span class="badge bg-light text-secondary border">เปิดอยู่ 08:00 - 20:00</span>
-    </div>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- แถบหมวดหมู่แบบเลื่อนได้ -->
-    <div class="d-flex overflow-auto mb-4" style="gap: 10px; scrollbar-width: none;">
-        @foreach (var cat in categories)
-        {
-            <button class="category-btn @(cat == categories.First() ? "active" : "")">@cat</button>
-        }
-    </div>
+<div class="kk-page">
 
-    <!-- รายการอาหารแยกตามหมวดหมู่ -->
-    @foreach (var cat in categories)
-    {
-        <h5 class="fw-bold mb-3 mt-4">@cat</h5>
-        <div class="row g-3">
-            @foreach (var item in Model.Where(m => m.Category == cat))
+    <!-- ป้ายหัวร้าน -->
+    <header class="kk-store-header">
+        <div class="kk-table-badge-primary">
+            <span class="kk-table-label">คุณกำลังสั่งอาหารที่</span>
+            @if (ViewBag.TableNumber != null)
             {
-                <div class="col-6">
-                    <div class="card food-card h-100 shadow-sm border-0">
-                        <img src="@item.ImageUrl" class="card-img-top food-img" alt="@item.Name">
-                        <div class="card-body p-2">
-                            <h6 class="card-title fw-bold mb-0">@item.Name</h6>
-                            <small class="text-muted">ความอร่อยระดับพรีเมียม</small>
-                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                <span class="text-danger fw-bold">@item.Price.ToString("N0")฿</span>
-                                <button class="btn btn-danger btn-sm rounded-circle shadow-sm">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <span class="kk-table-name">🍗 โต๊ะ @ViewBag.TableNumber</span>
+            }
+            else
+            {
+                <span class="kk-table-name">🍗 โต๊ะ Momay</span>
             }
         </div>
-    }
+
+        <div class="kk-logo-glow">
+            <img src="/image/Logo.png" alt="KinKubKai" class="kk-logo">
+        </div>
+        <h1 class="kk-store-name">กินกับไก่ <span>KinKubKai</span></h1>
+
+        <!-- ปุ่มติดตามสถานะอาหารที่สั่งไปแล้ว -->
+        <button type="button" class="kk-track-status-btn" id="btnOpenTrackStatus">
+            🔍 ติดตามอาหารที่สั่งไปแล้ว
+        </button>
+    </header>
+
+    <!-- แถบหมวดหมู่ -->
+    <nav class="kk-categories" id="kkCategories" aria-label="หมวดหมู่อาหาร">
+        @foreach (var cat in categories)
+        {
+            <button type="button"
+                    class="kk-chip @(cat == firstCat ? "active" : "")"
+                    data-target="cat-@(cat.GetHashCode())">
+                @cat
+            </button>
+        }
+    </nav>
+
+    <!-- รายการอาหารแยกตามหมวดหมู่ -->
+    <main class="kk-sections">
+        @foreach (var cat in categories)
+        {
+            var items = Model.Where(m => m.Category == cat).ToList();
+            <section class="kk-section" id="cat-@(cat.GetHashCode())">
+                <div class="kk-section-head">
+                    <h2 class="kk-section-title">✨ @cat</h2>
+                    <span class="kk-section-count">@items.Count รายการ</span>
+                </div>
+
+                <div class="kk-grid">
+                    @foreach (var item in items)
+                    {
+                        <article class="kk-card">
+                            <div class="kk-card-media">
+                                <img src="@item.ImageUrl" alt="@item.Name" loading="lazy">
+                            </div>
+                            <div class="kk-card-body">
+                                <h3 class="kk-card-title">@item.Name</h3>
+                                <p class="kk-card-sub">ความอร่อยระดับพรีเมียม</p>
+                                <div class="kk-card-foot">
+                                    <span class="kk-price">@item.Price.ToString("N0")<small>฿</small></span>
+                                    <button type="button"
+                                            class="kk-add-to-temp-basket"
+                                            aria-label="เพิ่ม @item.Name ลงตะกร้า"
+                                            data-name="@item.Name"
+                                            data-price="@item.Price">
+                                        <span aria-hidden="true">+</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+    </main>
 </div>
 
-<!-- Sticky Cart Button -->
-<div class="fixed-bottom p-3 bg-white border-top">
-    <button class="btn btn-cart w-100 py-3 fw-bold shadow">
-        ดูตะกร้าสินค้า (0)
+<!-- แถบตะกร้าลอยด้านล่างสำหรับ Recheck -->
+<div class="kk-custom-cart-bar">
+    <button type="button" class="kk-custom-cart-btn" id="btnOpenMyRecheckCart">
+        <span class="kk-cart-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                <path d="M8 7V5.5a4 4 0 0 1 8 0V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+        </span>
+        <span class="kk-cart-label">ดูรายการที่เลือกไว้ (ทบทวน)</span>
+        <span class="kk-cart-count" id="lblMyCartCount">0</span>
     </button>
 </div>
+
+<!-- หน้าต่าง Pop-up 1: Recheck รายการก่อนส่งครัว -->
+<div class="kk-new-modal-overlay" id="myNewRecheckModal">
+    <div class="kk-modal-card">
+        <div class="kk-modal-header">
+            <h3 class="kk-modal-title">📋 ทบทวนรายการอาหารก่อนส่งครัว</h3>
+            <button type="button" class="kk-modal-close" id="btnCloseMyRecheckModal">&times;</button>
+        </div>
+        <div class="kk-modal-body" id="divMyRecheckContainer"></div>
+        <div class="kk-modal-footer">
+            <div class="kk-total-row">
+                <span>ราคารวมทั้งหมด</span>
+                <span class="kk-total-price"><span id="lblMyTotalAmount">0</span><small>฿</small></span>
+            </div>
+            <button type="button" class="kk-submit-btn" id="btnFinalSubmitToKitchen" style="background-color: #4caf50 !important;">
+                🍗 ยืนยันส่งเข้าครัว
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- หน้าต่าง Pop-up 2: ติดตามสถานะอาหาร (ที่ส่งไปแล้ว & ได้รับแล้ว) -->
+<div class="kk-new-modal-overlay" id="myTrackStatusModal">
+    <div class="kk-modal-card">
+        <div class="kk-modal-header">
+            <h3 class="kk-modal-title">⏱️ ติดตามสถานะรายการอาหาร</h3>
+            <button type="button" class="kk-modal-close" id="btnCloseTrackModal">&times;</button>
+        </div>
+        <div class="kk-modal-body">
+            <!-- ส่วนสรุปแยกสถานะ -->
+            <div class="kk-track-tabs">
+                <div class="kk-track-tab active" id="tabCooking">กำลังปรุง ⏳</div>
+                <div class="kk-track-tab" id="tabServed">ได้รับแล้ว 🎉</div>
+            </div>
+
+            <!-- รายการอาหารตามสถานะ -->
+            <div class="kk-track-list-container" id="divTrackListItems">
+                <!-- ข้อมูลจะถูกโหลดเข้ามาด้วย AJAX/Fetch -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --kk-cream: #faf7f2;
+        --kk-white: #ffffff;
+        --kk-ink: #2c2520;
+        --kk-ink-soft: #8c7e74;
+        --kk-chili: #d93829;
+        --kk-chili-hover: #b82d20;
+        --kk-yellow: #fecb2f;
+        --kk-line: #ede5da;
+        --kk-shadow: 0 4px 16px rgba(44, 37, 32, 0.04);
+        --kk-shadow-lg: 0 12px 32px rgba(217, 56, 41, 0.25);
+    }
+
+    .kk-page {
+        background-color: var(--kk-cream);
+        padding: 24px 16px 160px;
+        font-family: 'Sarabun', sans-serif;
+        color: var(--kk-ink);
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    .kk-store-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .kk-table-badge-primary {
+        background: var(--kk-white);
+        border: 2px solid var(--kk-chili);
+        border-radius: 20px;
+        padding: 10px 24px;
+        margin-bottom: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .kk-table-label {
+        font-size: 12px;
+        color: var(--kk-ink-soft);
+    }
+
+    .kk-table-name {
+        font-family: 'Kanit', sans-serif;
+        font-weight: 800;
+        font-size: 20px;
+        color: var(--kk-chili);
+    }
+
+    /* ปุ่มติดตามสถานะอาหาร */
+    .kk-track-status-btn {
+        margin-top: 12px;
+        background: var(--kk-white);
+        border: 1px solid var(--kk-chili);
+        color: var(--kk-chili);
+        border-radius: 20px;
+        padding: 6px 16px;
+        font-family: 'Kanit', sans-serif;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        box-shadow: var(--kk-shadow);
+        transition: all 0.2s;
+    }
+
+        .kk-track-status-btn:active {
+            background: var(--kk-chili);
+            color: #fff;
+        }
+
+    .kk-logo-glow {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--kk-white);
+        border: 1px solid var(--kk-line);
+        margin-bottom: 12px;
+        box-shadow: var(--kk-shadow);
+    }
+
+    .kk-logo {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+        border-radius: 50%;
+    }
+
+    .kk-store-name {
+        font-family: 'Kanit', sans-serif;
+        font-weight: 800;
+        font-size: 26px;
+        margin: 0;
+    }
+
+        .kk-store-name span {
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--kk-yellow);
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 4px;
+        }
+
+    /* หมวดหมู่ & การ์ดสินค้า */
+    .kk-categories {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 12px 0;
+        background: var(--kk-cream);
+        scrollbar-width: none;
+    }
+
+    .kk-chip {
+        flex: 0 0 auto;
+        font-family: 'Kanit', sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        color: var(--kk-ink-soft);
+        background: var(--kk-white);
+        border: 1px solid var(--kk-line);
+        border-radius: 999px;
+        padding: 8px 18px;
+        box-shadow: var(--kk-shadow);
+    }
+
+        .kk-chip.active {
+            background: var(--kk-chili);
+            border-color: var(--kk-chili);
+            color: #fff;
+        }
+
+    .kk-section {
+        margin-bottom: 32px;
+    }
+
+    .kk-section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        border-bottom: 2px dashed var(--kk-line);
+        padding-bottom: 6px;
+    }
+
+    .kk-section-title {
+        font-family: 'Kanit', sans-serif;
+        font-weight: 700;
+        font-size: 18px;
+        margin: 0;
+    }
+
+    .kk-section-count {
+        font-size: 13px;
+        color: var(--kk-ink-soft);
+        background: #eee5da;
+        padding: 2px 8px;
+        border-radius: 6px;
+    }
+
+    .kk-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .kk-card {
+        background: var(--kk-white);
+        border: 1px solid var(--kk-line);
+        border-radius: 18px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--kk-shadow);
+    }
+
+    .kk-card-media {
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
+    }
+
+        .kk-card-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .kk-card-body {
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .kk-card-title {
+        font-family: 'Kanit', sans-serif;
+        font-weight: 600;
+        font-size: 15px;
+        margin: 0 0 4px;
+    }
+
+    .kk-card-sub {
+        font-size: 12px;
+        color: var(--kk-ink-soft);
+        margin: 0 0 12px;
+        flex: 1;
+    }
+
+    .kk-card-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .kk-price {
+        font-family: 'Kanit', sans-serif;
+        font-weight: 700;
+        font-size: 18px;
+        color: var(--kk-chili);
+    }
+
+    .kk-add-to-temp-basket {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--kk-chili);
+        color: #fff;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Bottom Floating Bar */
+    .kk-custom-cart-bar {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        z-index: 9999;
+        padding: 16px;
+        background: linear-gradient(to top, var(--kk-cream) 60%, rgba(250, 247, 242, 0));
+        display: flex;
+        justify-content: center;
+    }
+
+    .kk-custom-cart-btn {
+        width: 100%;
+        max-width: 500px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--kk-chili);
+        color: #fff;
+        border: none;
+        border-radius: 16px;
+        padding: 16px 20px;
+        font-family: 'Kanit', sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        box-shadow: var(--kk-shadow-lg);
+    }
+
+    .kk-cart-label {
+        flex: 1;
+        text-align: left;
+    }
+
+    .kk-cart-count {
+        background: var(--kk-yellow);
+        color: #000;
+        border-radius: 999px;
+        min-width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 800;
+        padding: 0 8px;
+    }
+
+    /* Modals CSS */
+    .kk-new-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(44, 37, 32, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 20000;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+
+        .kk-new-modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+    .kk-modal-card {
+        background: var(--kk-cream);
+        width: 100%;
+        max-width: 540px;
+        border-top-left-radius: 28px;
+        border-top-right-radius: 28px;
+        display: flex;
+        flex-direction: column;
+        max-height: 80vh;
+        transform: translateY(100%);
+        transition: transform 0.25s ease;
+    }
+
+    .kk-new-modal-overlay.open .kk-modal-card {
+        transform: translateY(0);
+    }
+
+    .kk-modal-header {
+        padding: 20px;
+        background: var(--kk-white);
+        border-top-left-radius: 28px;
+        border-top-right-radius: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--kk-line);
+    }
+
+    .kk-modal-title {
+        font-family: 'Kanit', sans-serif;
+        font-weight: 700;
+        font-size: 18px;
+        margin: 0;
+    }
+
+    .kk-modal-close {
+        background: none;
+        border: none;
+        font-size: 28px;
+        color: var(--kk-ink-soft);
+        cursor: pointer;
+    }
+
+    .kk-modal-body {
+        padding: 16px;
+        overflow-y: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* Recheck Item Row */
+    .kk-recheck-item {
+        background: var(--kk-white);
+        border: 1px solid var(--kk-line);
+        border-radius: 14px;
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: var(--kk-shadow);
+    }
+
+    .kk-qty-ctrl {
+        display: flex;
+        align-items: center;
+        background: var(--kk-cream);
+        border: 1px solid var(--kk-line);
+        border-radius: 999px;
+        padding: 2px;
+        gap: 10px;
+    }
+
+    .kk-qty-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: none;
+        background: var(--kk-white);
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .kk-modal-footer {
+        background: var(--kk-white);
+        padding: 20px;
+        border-top: 1px solid var(--kk-line);
+    }
+
+    .kk-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        font-family: 'Kanit', sans-serif;
+        font-weight: 600;
+    }
+
+    .kk-total-price {
+        color: var(--kk-chili);
+        font-size: 22px;
+        font-weight: 800;
+    }
+
+    .kk-submit-btn {
+        width: 100%;
+        color: white;
+        border: none;
+        border-radius: 16px;
+        padding: 16px;
+        font-family: 'Kanit', sans-serif;
+        font-weight: 700;
+        font-size: 17px;
+        cursor: pointer;
+    }
+
+    /* แท็บติดตามสถานะอาหาร */
+    .kk-track-tabs {
+        display: flex;
+        background: var(--kk-white);
+        padding: 4px;
+        border-radius: 12px;
+        border: 1px solid var(--kk-line);
+        margin-bottom: 8px;
+    }
+
+    .kk-track-tab {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        font-family: 'Kanit', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        color: var(--kk-ink-soft);
+        transition: all 0.2s;
+    }
+
+        .kk-track-tab.active {
+            background: var(--kk-chili);
+            color: #fff;
+        }
+
+    /* การ์ดแถวสถานะย่อย */
+    .kk-status-row {
+        background: var(--kk-white);
+        border-radius: 14px;
+        border: 1px solid var(--kk-line);
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--kk-shadow);
+    }
+
+    .kk-status-name {
+        font-family: 'Kanit', sans-serif;
+        font-weight: 600;
+        font-size: 15px;
+    }
+
+    .kk-status-qty {
+        background: #eee5da;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 6px;
+        margin-left: 6px;
+    }
+
+    .kk-badge-cooking {
+        background: #fff8e1;
+        color: #ffb300;
+        font-family: 'Kanit', sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid #ffe082;
+    }
+
+    .kk-badge-served {
+        background: #e8f5e9;
+        color: #4caf50;
+        font-family: 'Kanit', sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid #c8e6c9;
+    }
+</style>
+
+<script>
+    (function () {
+        // จัดการเปลี่ยนหมวดหมู่
+        document.querySelectorAll('.kk-chip').forEach(function (chip) {
+            chip.addEventListener('click', function () {
+                var target = document.getElementById(chip.dataset.target);
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        var localBasket = {};
+        var serverOrders = []; // บันทึกประวัติอาหารที่สั่งไปแล้วจากฐานข้อมูล
+        var currentTrackTab = 'Cooking'; // แท็บปัจจุบันที่กำลังดูอยู่ ('Cooking' หรือ 'Served')
+
+        var lblCount = document.getElementById('lblMyCartCount');
+        var recheckModal = document.getElementById('myNewRecheckModal');
+        var divContainer = document.getElementById('divMyRecheckContainer');
+        var lblTotal = document.getElementById('lblMyTotalAmount');
+
+        var trackModal = document.getElementById('myTrackStatusModal');
+        var divTrackList = document.getElementById('divTrackListItems');
+
+        function refreshBasketCount() {
+            var total = 0;
+            Object.keys(localBasket).forEach(function (k) { total += localBasket[k].qty; });
+            lblCount.textContent = total;
+        }
+
+        // เพิ่มของลงตะกร้าจำลอง
+        document.querySelectorAll('.kk-add-to-temp-basket').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault(); e.stopPropagation();
+                var name = btn.dataset.name;
+                var price = parseFloat(btn.dataset.price);
+                if (!localBasket[name]) localBasket[name] = { price: price, qty: 0 };
+                localBasket[name].qty++;
+                refreshBasketCount();
+            });
+        });
+
+        // เปิดหน้าต่าง Recheck ตะกร้า
+        document.getElementById('btnOpenMyRecheckCart').addEventListener('click', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            renderRecheckUI();
+            recheckModal.classList.add('open');
+        });
+
+        function renderRecheckUI() {
+            divContainer.innerHTML = '';
+            var grandTotal = 0;
+            var hasData = false;
+            Object.keys(localBasket).forEach(function (name) {
+                if (localBasket[name].qty <= 0) return;
+                hasData = true;
+                var currentSum = localBasket[name].price * localBasket[name].qty;
+                grandTotal += currentSum;
+                var row = document.createElement('div');
+                row.className = 'kk-recheck-item';
+                row.innerHTML = `
+                    <div><b>${name}</b><br/><span style="color:var(--kk-chili); font-weight:700;">${currentSum.toLocaleString()}฿</span></div>
+                    <div class="kk-qty-ctrl">
+                        <button type="button" class="kk-qty-btn custom-dec" data-itemname="${name}">-</button>
+                        <span>${localBasket[name].qty}</span>
+                        <button type="button" class="kk-qty-btn custom-inc" data-itemname="${name}">+</button>
+                    </div>
+                `;
+                divContainer.appendChild(row);
+            });
+            if (!hasData) divContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#8c7e74;">ไม่มีอาหารในตะกร้าจ้า</div>';
+            lblTotal.textContent = grandTotal.toLocaleString();
+        }
+
+        divContainer.addEventListener('click', function (e) {
+            e.preventDefault();
+            var targetName = e.target.dataset.itemname;
+            if (!targetName) return;
+            if (e.target.classList.contains('custom-inc')) localBasket[targetName].qty++;
+            else if (e.target.classList.contains('custom-dec')) {
+                if (localBasket[targetName].qty > 0) {
+                    localBasket[targetName].qty--;
+                    if (localBasket[targetName].qty === 0) delete localBasket[targetName];
+                }
+            }
+            refreshBasketCount(); renderRecheckUI();
+        });
+
+        // ยืนยันส่งข้อมูลเข้าห้องครัวจริง
+        document.getElementById('btnFinalSubmitToKitchen').addEventListener('click', function (e) {
+            e.preventDefault();
+            var dataPayload = Object.keys(localBasket).map(function (name) {
+                return { name: name, price: localBasket[name].price, quantity: localBasket[name].qty };
+            });
+            if (dataPayload.length === 0) return;
+
+            var btnSubmit = document.getElementById('btnFinalSubmitToKitchen');
+            btnSubmit.disabled = true;
+
+            fetch('/Customer/PlaceOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataPayload)
+            })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                btnSubmit.disabled = false;
+                if (data.success) {
+                    alert('ส่งออเดอร์เข้าครัวสำเร็จแล้วครับ! 🎉');
+                    localBasket = {}; refreshBasketCount();
+                    recheckModal.classList.remove('open');
+                    fetchCurrentOrderStatus(); // อัปเดตข้อมูลการติดตามทันทีหลังสั่งเสร็จ
+                }
+            }).catch(function() { btnSubmit.disabled = false; });
+        });
+
+        // ---------- ระบบดึงข้อมูลติดตามสถานะอาหาร (AJAX FETCH) ----------
+        function fetchCurrentOrderStatus() {
+            // เรียกไปยัง Action Method ที่ดึงรายการอาหารของโต๊ะนี้
+            fetch('/Customer/GetTableOrders')
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    serverOrders = data.items; // โครงสร้างข้อมูลควรเป็นแบบ: [ { name: 'ไก่ทอด', qty: 2, status: 'Cooking' } ]
+                    renderTrackStatusUI();
+                }
+            });
+        }
+
+        function renderTrackStatusUI() {
+            divTrackList.innerHTML = '';
+            var filtered = serverOrders.filter(function (x) { return x.status === currentTrackTab; });
+
+            if (filtered.length === 0) {
+                divTrackList.innerHTML = `<div style="text-align:center; padding:40px; color:#8c7e74;">ไม่มีรายการอาหารในหมวดนี้จ้า 😊</div>`;
+                return;
+            }
+
+            filtered.forEach(function (item) {
+                var row = document.createElement('div');
+                row.className = 'kk-status-row';
+
+                var badgeHtml = currentTrackTab === 'Cooking'
+                    ? `<span class="kk-badge-cooking">⏳ กำลังปรุง</span>`
+                    : `<span class="kk-badge-served">🍳 เสิร์ฟแล้ว</span>`;
+
+                row.innerHTML = `
+                    <div>
+                        <span class="kk-status-name">${item.name}</span>
+                        <span class="kk-status-qty">x ${item.qty}</span>
+                    </div>
+                    <div>${badgeHtml}</div>
+                `;
+                divTrackList.appendChild(row);
+            });
+        }
+
+        // แท็บควบคุมในหน้าต่างติดตามสถานะ
+        document.getElementById('tabCooking').addEventListener('click', function() {
+            currentTrackTab = 'Cooking';
+            document.getElementById('tabCooking').classList.add('active');
+            document.getElementById('tabServed').classList.remove('active');
+            renderTrackStatusUI();
+        });
+
+        document.getElementById('tabServed').addEventListener('click', function() {
+            currentTrackTab = 'Served';
+            document.getElementById('tabServed').classList.add('active');
+            document.getElementById('tabCooking').classList.remove('active');
+            renderTrackStatusUI();
+        });
+
+        // เปิด-ปิดหน้าต่างติดตามสถานะ
+        document.getElementById('btnOpenTrackStatus').addEventListener('click', function (e) {
+            e.preventDefault();
+            fetchCurrentOrderStatus(); // โหลดสถานะล่าสุดจากหลังบ้าน
+            trackModal.classList.add('open');
+        });
+
+        document.getElementById('btnCloseTrackModal').addEventListener('click', function () { trackModal.classList.remove('remove'); myTrackStatusModal.classList.remove('open'); });
+        document.getElementById('btnCloseMyRecheckModal').addEventListener('click', function () { recheckModal.classList.remove('open'); });
+    })();
+</script>
